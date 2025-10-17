@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smart Home Control</title>
+  <style>
+    body { font-family: Arial; background: #f2f2f2; padding: 20px; }
+    .card {
+      background: white; border-radius: 10px; padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2); margin: 20px auto; max-width: 400px;
+    }
+    button {
+      margin: 5px; padding: 10px 20px;
+      background: #007bff; color: white; border: none; border-radius: 5px;
+    }
+    button:hover { background: #0056b3; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<h2>Smart Home Controller</h2>
+<button onclick="connectPort()">🔌 Connect to Arduino</button>
+
+<div id="login" class="card">
+  <h3>🔐 Enter Password</h3>
+  <input type="password" id="password" placeholder="Enter password">
+  <button onclick="checkPassword()">Next ➡️</button>
+</div>
+
+<div id="control" class="hidden">
+  <div class="card">
+<h3>💡 Light Control</h3>
+    <button onclick="sendCmd('LED1_ON')">LED 1 ON</button>
+    <button onclick="sendCmd('LED1_OFF')">LED 1 OFF</button><br>
+    <button onclick="sendCmd('LED2_ON')">LED 2 ON</button>
+    <button onclick="sendCmd('LED2_OFF')">LED 2 OFF</button><br>
+    
+  </div>
+
+  <div class="card">
+    <h3>🚪 Door Open</h3>
+    <button onclick="sendCmd('GATE_OPEN')">Open Door</button>
+    <button onclick="sendCmd('GATE_CLOSE')">Close Door</button>
+  </div>
+
+  <div class="card">
+    <h3>🔁 Extra Servo</h3>
+    <button onclick="sendCmd('SERVO2_90')">Rotate 90°</button>
+    <button onclick="sendCmd('SERVO2_0')">Rotate 0°</button>
+  </div>
+
+  <div class="card">
+    <h3>🔔 Door Bell</h3>
+    <button onclick="sendCmd('BUZZER_ON')">Ring Bell</button>
+    <p>or use the physical push button</p>
+  </div>
+</div>
+
+<script>
+let port, writer;
+
+async function connectPort() {
+  try {
+    port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 9600 });
+    writer = port.writable.getWriter();
+    alert("✅ Connected to Arduino");
+  } catch (e) {
+    alert("❌ Connection failed: " + e);
+  }
+}
+
+function checkPassword() {
+if (document.getElementById("password").value === "1234") {
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("control").classList.remove("hidden");
+  } else {
+    alert("Wrong password!");
+  }
+}
+
+async function sendCmd(cmd) {
+  if (!writer) {
+    alert("Connect to Arduino first");
+    return;
+  }
+  await writer.write(new TextEncoder().encode(cmd + "\n"));
+}
+</script>
+
+</body>
+</html>
